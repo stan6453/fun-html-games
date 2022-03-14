@@ -61,8 +61,7 @@
 
                         const testForXAxisCollision = (myX <= x) && ((myX + myWidth) >= x)
                         const testForYAxisCollision = (myY <= y) && ((myY + myHeight) >= y)
-                        console.log("myX: ", myX, " myWidth: ", myWidth, " x: ", x)
-                        console.log("myX + myWidth", myX + myWidth)
+                       
                         if (testForXAxisCollision && testForYAxisCollision) {
                             clearInterval(collisionChecker);
                             this.interrupt()
@@ -76,6 +75,7 @@
 
                 }
             }
+            
 
         </script>
 
@@ -96,6 +96,7 @@
 
             function addNewObstacle(obstacles) {
                 let newObstacle = new gameComponent(ArenaWidth - 50, 50, 50, "red");
+                console.log(newObstacle)
                 obstacles.push(newObstacle);
                 newObstacle.moveForward()
 
