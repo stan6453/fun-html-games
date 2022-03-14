@@ -16,9 +16,11 @@
         </svg>
 
         <script>
-            function gameComponent(x = 10, width = 50, height = 50, fill = "blue") {
+            let GameArena = d3.select("#chrome-game");
+
+            function GameComponent(x = 10, width = 50, height = 50, fill = "blue") {
                 let y = ArenaHeight - height;
-                let body = GameArena
+                this.body = GameArena
                     .append("rect")
                     .attr("width", width)
                     .attr("height", height)
@@ -29,39 +31,24 @@
                 this.jump = (jumpHeight) => {
 
                     if (jumpable == true) {
-                        body.transition().duration(700).ease(d3.easeLinear).attr("y", jumpHeight)
-                            .on("end", () => { body.transition().duration(700).attr("y", y).on("end", () => jumpable = true) })
+                        this.body.transition().duration(700).ease(d3.easeLinear).attr("y", jumpHeight)
+                            .on("end", () => { this.body.transition().duration(700).attr("y", y).on("end", () => jumpable = true) })
                         jumpable = false
                     }
                 }
 
-                this.moveForward = () => {
-                    body.transition().duration(2000).ease(d3.easeLinear).attr("x", -50);
-                }
-
-                this.getDimensions = () => {
-                    return {
-                        x: body.attr("x"),
-                        y: body.attr("y"),
-                        width: body.attr("width"),
-                        height: body.attr("height")
-                    }
-                }
-
-                this.interrupt = () => body.interrupt()
-
                 this.didObjectCollide = (obstacles) => {
-                    let myX = parseFloat(body.attr("x"))
-                    let myY = parseFloat(body.attr("y"))
-                    let myWidth = parseFloat(body.attr("width"))
-                    let myHeight = parseFloat(body.attr("height"))
+                    let myX = parseFloat(this.body.attr("x"))
+                    let myY = parseFloat(this.body.attr("y"))
+                    let myWidth = parseFloat(this.body.attr("width"))
+                    let myHeight = parseFloat(this.body.attr("height"))
 
                     for (let index = 0; index < obstacles.length; index++) {
                         const { x, y, width, height } = obstacles[index].getDimensions()
 
                         const testForXAxisCollision = (myX <= x) && ((myX + myWidth) >= x)
                         const testForYAxisCollision = (myY <= y) && ((myY + myHeight) >= y)
-                       
+
                         if (testForXAxisCollision && testForYAxisCollision) {
                             clearInterval(collisionChecker);
                             this.interrupt()
@@ -75,12 +62,41 @@
 
                 }
             }
-            
+
+            function Obstacle(x = 10, width = 50, height = 50, fill = "blue") {
+                let y = ArenaHeight - height;
+                this.body = GameArena
+                    .append("rect")
+                    .attr("width", width)
+                    .attr("height", height)
+                    .attr("x", x)
+                    .attr("y", y)
+                    .attr("fill", fill)
+            }
+
+            Object.setPrototypeOf(Obstacle.prototype, GameComponent.prototype);
+
+            GameComponent.prototype.getDimensions = function () {
+                return {
+                    x: this.body.attr("x"),
+                    y: this.body.attr("y"),
+                    width: this.body.attr("width"),
+                    height: this.body.attr("height")
+                }
+            }
+
+            GameComponent.prototype.interrupt = function () {
+                this.body.interrupt()
+            }
+
+
+            Obstacle.prototype.moveForward = function () {
+                this.body.transition().duration(2000).ease(d3.easeLinear).attr("x", -50);
+            }
 
         </script>
 
         <script>
-            let GameArena = d3.select("#chrome-game");
             let jumpable = true;
             ArenaHeight = removePxPostFixAndReturnFLoat(GameArena.style("height"))
             ArenaWidth = removePxPostFixAndReturnFLoat(GameArena.style("width"))
@@ -90,12 +106,12 @@
             }
 
 
-            let player = new gameComponent();
+            let player = new GameComponent();
 
-            let obstacles = [new gameComponent(ArenaWidth - 50, 50, 50, "red")]
+            let obstacles = [new Obstacle(ArenaWidth - 50, 50, 50, "red")]
 
             function addNewObstacle(obstacles) {
-                let newObstacle = new gameComponent(ArenaWidth - 50, 50, 50, "red");
+                let newObstacle = new Obstacle(ArenaWidth - 50, 50, 50, "red");
                 console.log(newObstacle)
                 obstacles.push(newObstacle);
                 newObstacle.moveForward()
