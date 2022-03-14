@@ -1,117 +1,121 @@
 <!DOCTYPE html>
 <htm lang="en">
 
-<head>
-    <script src="d3-7.3.0\package\dist/d3.js"></script>
+    <head>
+        <script src="d3-7.3.0\package\dist/d3.js"></script>
 
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>chrome-game</title>
-</head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>chrome-game</title>
+    </head>
 
-<body>
-    <svg id="chrome-game" width="100%" height="500px" style="border: 1px solid red;">
+    <body>
+        <svg id="chrome-game" width="100%" height="500px" style="border: 1px solid red;">
 
-    </svg>
+        </svg>
 
-    <script>
-        let GameArena = d3.select("#chrome-game");
-        let jumpable = true;
-        ArenaHeight = removePxPostFixAndReturnFLoat(GameArena.style("height"))
-        ArenaWidth = removePxPostFixAndReturnFLoat(GameArena.style("width"))
+        <script>
+            function gameComponent(x = 10, width = 50, height = 50, fill = "blue") {
+                let y = ArenaHeight - height;
+                let body = GameArena
+                    .append("rect")
+                    .attr("width", width)
+                    .attr("height", height)
+                    .attr("x", x)
+                    .attr("y", y)
+                    .attr("fill", fill)
 
-        function removePxPostFixAndReturnFLoat(value) {
-            return parseFloat(value.replace("px", ""));
-        }
+                this.jump = (jumpHeight) => {
 
-        function gameComponent(x = 10, width = 50, height = 50, fill = "blue") {
-            let y = ArenaHeight - height;
-            let body = GameArena
-                .append("rect")
-                .attr("width", width)
-                .attr("height", height)
-                .attr("x", x)
-                .attr("y", y)
-                .attr("fill", fill)
-
-            this.jump = (jumpHeight) => {
-
-                if (jumpable == true) {
-                    body.transition().duration(700).ease(d3.easeLinear).attr("y", jumpHeight)
-                        .on("end", () => { body.transition().duration(700).attr("y", y).on("end",()=>jumpable=true) })
-                    jumpable = false
-                }
-            }
-
-            this.moveForward = () => {
-                body.transition().duration(2000).ease(d3.easeLinear).attr("x", -50);
-            }
-
-            this.getDimensions = () => {
-                return {
-                    x: body.attr("x"),
-                    y: body.attr("y"),
-                    width: body.attr("width"),
-                    height: body.attr("height")
-                }
-            }
-
-            this.interrupt = () => body.interrupt()
-
-            this.didObjectCollide = (obstacles) => {
-                let myX = parseFloat(body.attr("x"))
-                let myY = parseFloat(body.attr("y"))
-                let myWidth = parseFloat(body.attr("width"))
-                let myHeight = parseFloat(body.attr("height"))
-
-                for (let index = 0; index < obstacles.length; index++) {
-                    const { x, y, width, height } = obstacles[index].getDimensions()
-
-                    const testForXAxisCollision = (myX <= x) && ((myX + myWidth) >= x)
-                    const testForYAxisCollision = (myY <= y) && ((myY + myHeight) >= y)
-                    console.log("myX: ", myX, " myWidth: ", myWidth, " x: ", x)
-                    console.log("myX + myWidth", myX + myWidth)
-                    if (testForXAxisCollision && testForYAxisCollision) {
-                        clearInterval(collisionChecker);
-                        this.interrupt()
-                        console.log("collided");
-                        clearInterval(obstacleFactory)
-                        for (let index = 0; index < obstacles.length; index++) {
-                            obstacles[index].interrupt()
-                        }
+                    if (jumpable == true) {
+                        body.transition().duration(700).ease(d3.easeLinear).attr("y", jumpHeight)
+                            .on("end", () => { body.transition().duration(700).attr("y", y).on("end", () => jumpable = true) })
+                        jumpable = false
                     }
                 }
 
+                this.moveForward = () => {
+                    body.transition().duration(2000).ease(d3.easeLinear).attr("x", -50);
+                }
+
+                this.getDimensions = () => {
+                    return {
+                        x: body.attr("x"),
+                        y: body.attr("y"),
+                        width: body.attr("width"),
+                        height: body.attr("height")
+                    }
+                }
+
+                this.interrupt = () => body.interrupt()
+
+                this.didObjectCollide = (obstacles) => {
+                    let myX = parseFloat(body.attr("x"))
+                    let myY = parseFloat(body.attr("y"))
+                    let myWidth = parseFloat(body.attr("width"))
+                    let myHeight = parseFloat(body.attr("height"))
+
+                    for (let index = 0; index < obstacles.length; index++) {
+                        const { x, y, width, height } = obstacles[index].getDimensions()
+
+                        const testForXAxisCollision = (myX <= x) && ((myX + myWidth) >= x)
+                        const testForYAxisCollision = (myY <= y) && ((myY + myHeight) >= y)
+                        console.log("myX: ", myX, " myWidth: ", myWidth, " x: ", x)
+                        console.log("myX + myWidth", myX + myWidth)
+                        if (testForXAxisCollision && testForYAxisCollision) {
+                            clearInterval(collisionChecker);
+                            this.interrupt()
+                            console.log("collided");
+                            clearInterval(obstacleFactory)
+                            for (let index = 0; index < obstacles.length; index++) {
+                                obstacles[index].interrupt()
+                            }
+                        }
+                    }
+
+                }
             }
-        }
 
-        let player = new gameComponent();
+        </script>
 
-        let obstacles = [new gameComponent(ArenaWidth - 50, 50, 50, "red")]
+        <script>
+            let GameArena = d3.select("#chrome-game");
+            let jumpable = true;
+            ArenaHeight = removePxPostFixAndReturnFLoat(GameArena.style("height"))
+            ArenaWidth = removePxPostFixAndReturnFLoat(GameArena.style("width"))
 
-        function addNewObstacle(obstacles) {
-            let newObstacle = new gameComponent(ArenaWidth - 50, 50, 50, "red");
-            obstacles.push(newObstacle);
-            newObstacle.moveForward()
-
-        }
-
-        let obstacleFactory = setInterval(addNewObstacle, 2000, obstacles)
-
-        function moveObstaclesForward(obstacles) {
-            for (let index = 0; index < obstacles.length; index++) {
-                obstacles[index].moveForward()
+            function removePxPostFixAndReturnFLoat(value) {
+                return parseFloat(value.replace("px", ""));
             }
-        }
-        moveObstaclesForward(obstacles)
 
-        let collisionChecker = setInterval(player.didObjectCollide, 10, obstacles)
 
-        GameArena.on("mousedown",()=> player.jump(90))
-        GameArena.on("mouseup",()=> player.jump(300))
+            let player = new gameComponent();
 
-    </script>
-</body>
+            let obstacles = [new gameComponent(ArenaWidth - 50, 50, 50, "red")]
+
+            function addNewObstacle(obstacles) {
+                let newObstacle = new gameComponent(ArenaWidth - 50, 50, 50, "red");
+                obstacles.push(newObstacle);
+                newObstacle.moveForward()
+
+            }
+
+            let obstacleFactory = setInterval(addNewObstacle, 2000, obstacles)
+
+            function moveObstaclesForward(obstacles) {
+                for (let index = 0; index < obstacles.length; index++) {
+                    obstacles[index].moveForward()
+                }
+            }
+            moveObstaclesForward(obstacles)
+
+            let collisionChecker = setInterval(player.didObjectCollide, 10, obstacles)
+
+            GameArena.on("mousedown", () => player.jump(90))
+            GameArena.on("mouseup", () => player.jump(300))
+
+        </script>
+    </body>
 
 </htm
