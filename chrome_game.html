@@ -63,8 +63,9 @@
                 }
             }
 
-            function Obstacle(x = 10, width = 50, height = 50, fill = "blue") {
-                let y = ArenaHeight - height;
+            function Obstacle(x = 10, width = 50, height = 50, fill = "blue", type) {
+
+                let y = type === "bird" ? ArenaHeight - (height + height+height) : ArenaHeight - height;
                 this.body = GameArena
                     .append("rect")
                     .attr("width", width)
@@ -111,11 +112,15 @@
             let obstacles = [new Obstacle(ArenaWidth - 50, 50, 50, "red")]
 
             function addNewObstacle(obstacles) {
-                let newObstacle = new Obstacle(ArenaWidth - 50, 50, 50, "red");
+                let obstacleType = pickRandom(["bird", "tree", "house"])
+                let newObstacle = new Obstacle(ArenaWidth - 50, 50, 50, "red",obstacleType);
                 console.log(newObstacle)
                 obstacles.push(newObstacle);
                 newObstacle.moveForward()
+            }
 
+            function pickRandom(arr) {
+                return arr[Math.floor(Math.random() * ((arr.length - 1) - 0 + 1))]
             }
 
             let obstacleFactory = setInterval(addNewObstacle, 2000, obstacles)
@@ -129,8 +134,8 @@
 
             let collisionChecker = setInterval(player.didObjectCollide, 10, obstacles)
 
-            GameArena.on("mousedown", () => player.jump(90))
-            GameArena.on("mouseup", () => player.jump(300))
+            GameArena.on("mousedown", () => player.jump(200))
+            // GameArena.on("mouseup", () => player.jump(400))
 
         </script>
     </body>
