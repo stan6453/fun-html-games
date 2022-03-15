@@ -45,11 +45,13 @@
                 this.jump = (jumpHeight) => {
 
                     if (jumpable == true) {
-                        this.body.attr("href",JumpingImage).transition().duration(700).ease(d3.easeLinear).attr("y", jumpHeight)
-                            .on("end", () => { this.body.transition().duration(700).attr("y", y).on("end", () => {
-                                this.body.attr("href",this.imageAssetLocation)
-                                jumpable = true
-                            }) })
+                        this.body.attr("href", JumpingImage).transition().duration(700).ease(d3.easeLinear).attr("y", jumpHeight)
+                            .on("end", () => {
+                                this.body.transition().duration(700).attr("y", y).on("end", () => {
+                                    this.body.attr("href", this.imageAssetLocation)
+                                    jumpable = true
+                                })
+                            })
                         jumpable = false
                     }
                 }
@@ -83,13 +85,29 @@
             function Obstacle(x = 10, width = 50, height = 50, fill = "blue", type) {
 
                 let y = type === "bird" ? ArenaHeight - (height + height + height) : ArenaHeight - height;
-                this.body = GameArena
-                    .append("rect")
-                    .attr("width", width)
-                    .attr("height", height)
-                    .attr("x", x)
-                    .attr("y", y)
-                    .attr("fill", fill)
+                let image = type === "tree" ?
+                    pickRandom(["assets/images/trees/6t4t_d3p0_21n0607.jpg", "assets/images/trees/Unbhtitled.jpg", "assets/images/trees/Untitlhgfged.jpg", "assets/images/trees/Untitlhgfved.jpg", "assets/images/trees/Untitljked.jpg"])
+                    :
+                    pickRandom(["assets/images/birds/flying-bird-gif-bird.gif", "assets/images/birds/rio-bird.gif", "assets/images/birds/ezgif.com-rotate (1).gif", "assets/images/birds/ezgif.com-rotate.gif"]);
+
+                this.body = image ?
+
+                    GameArena
+                        .append("image")
+                        .attr("href", image)
+                        .attr("width", width)
+                        .attr("height", height)
+                        .attr("x", x)
+                        .attr("y", y)
+
+                    :
+                    GameArena
+                        .append("rect")
+                        .attr("width", width)
+                        .attr("height", height)
+                        .attr("x", x)
+                        .attr("y", y)
+                        .attr("fill", fill)
             }
 
             Object.setPrototypeOf(Obstacle.prototype, GameComponent.prototype);
@@ -109,7 +127,7 @@
 
 
             Obstacle.prototype.moveForward = function () {
-                this.body.transition().duration(2000).ease(d3.easeLinear).attr("x", -50);
+                this.body.transition().duration(2000).ease(d3.easeLinear).attr("x", -50).on("end", () => this.body.remove());
             }
 
         </script>
@@ -124,13 +142,14 @@
             }
 
 
-            let player = new GameComponent(x = 10, width = 100, height = 100, "assets/images/200w.gif","assets/images/images (13).png");
+            let player = new GameComponent(x = 10, width = 100, height = 100, "assets/images/200w.gif", "assets/images/images (13).png");
 
-            let obstacles = [new Obstacle(ArenaWidth - 50, 50, 50, "red")]
+            let obstacles = []
 
             function addNewObstacle(obstacles) {
-                let obstacleType = pickRandom(["bird", "tree", "house"])
-                let newObstacle = new Obstacle(ArenaWidth - 50, 50, 50, "red", obstacleType);
+                let obstacleType = pickRandom(["bird", "tree"])
+
+                let newObstacle = new Obstacle(ArenaWidth - 50, 100, 100, "red", obstacleType);
                 obstacles.push(newObstacle);
                 newObstacle.moveForward()
             }
