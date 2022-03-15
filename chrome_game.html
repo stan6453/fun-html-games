@@ -46,7 +46,10 @@
 
                     if (jumpable == true) {
                         this.body.attr("href",JumpingImage).transition().duration(700).ease(d3.easeLinear).attr("y", jumpHeight)
-                            .on("end", () => { this.body.transition().duration(700).attr("y", y).attr("href",this.imageAssetLocation).on("end", () => jumpable = true) })
+                            .on("end", () => { this.body.transition().duration(700).attr("y", y).on("end", () => {
+                                this.body.attr("href",this.imageAssetLocation)
+                                jumpable = true
+                            }) })
                         jumpable = false
                     }
                 }
@@ -121,7 +124,7 @@
             }
 
 
-            let player = new GameComponent(x = 10, width = 100, height = 100, "assets/images/200w.gif","assets/images/images (13).jpeg");
+            let player = new GameComponent(x = 10, width = 100, height = 100, "assets/images/200w.gif","assets/images/images (13).png");
 
             let obstacles = [new Obstacle(ArenaWidth - 50, 50, 50, "red")]
 
