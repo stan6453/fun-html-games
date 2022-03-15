@@ -18,21 +18,35 @@
         <script>
             let GameArena = d3.select("#chrome-game");
 
-            function GameComponent(x = 10, width = 50, height = 50, fill = "blue") {
+            function GameComponent(x = 10, width = 50, height = 50, imageAssetLocation, JumpingImage, gameOverImage, fill = "blue") {
                 let y = ArenaHeight - height;
-                this.body = GameArena
-                    .append("rect")
-                    .attr("width", width)
-                    .attr("height", height)
-                    .attr("x", x)
-                    .attr("y", y)
-                    .attr("fill", fill)
+                this.imageAssetLocation = imageAssetLocation;
+                this.JumpingImage = JumpingImage;
+                this.gameOverImage = gameOverImage;
+                this.body = imageAssetLocation ?
+                    GameArena
+                        .append("image")
+                        .attr("href", this.imageAssetLocation)
+                        .attr("width", width)
+                        .attr("height", height)
+                        .attr("x", x)
+                        .attr("y", y)
+
+                    :
+
+                    GameArena
+                        .append("rect")
+                        .attr("width", width)
+                        .attr("height", height)
+                        .attr("x", x)
+                        .attr("y", y)
+                        .attr("fill", fill)
 
                 this.jump = (jumpHeight) => {
 
                     if (jumpable == true) {
-                        this.body.transition().duration(700).ease(d3.easeLinear).attr("y", jumpHeight)
-                            .on("end", () => { this.body.transition().duration(700).attr("y", y).on("end", () => jumpable = true) })
+                        this.body.attr("href",JumpingImage).transition().duration(700).ease(d3.easeLinear).attr("y", jumpHeight)
+                            .on("end", () => { this.body.transition().duration(700).attr("y", y).attr("href",this.imageAssetLocation).on("end", () => jumpable = true) })
                         jumpable = false
                     }
                 }
@@ -65,7 +79,7 @@
 
             function Obstacle(x = 10, width = 50, height = 50, fill = "blue", type) {
 
-                let y = type === "bird" ? ArenaHeight - (height + height+height) : ArenaHeight - height;
+                let y = type === "bird" ? ArenaHeight - (height + height + height) : ArenaHeight - height;
                 this.body = GameArena
                     .append("rect")
                     .attr("width", width)
@@ -107,14 +121,13 @@
             }
 
 
-            let player = new GameComponent();
+            let player = new GameComponent(x = 10, width = 100, height = 100, "assets/images/200w.gif","assets/images/images (13).jpeg");
 
             let obstacles = [new Obstacle(ArenaWidth - 50, 50, 50, "red")]
 
             function addNewObstacle(obstacles) {
                 let obstacleType = pickRandom(["bird", "tree", "house"])
-                let newObstacle = new Obstacle(ArenaWidth - 50, 50, 50, "red",obstacleType);
-                console.log(newObstacle)
+                let newObstacle = new Obstacle(ArenaWidth - 50, 50, 50, "red", obstacleType);
                 obstacles.push(newObstacle);
                 newObstacle.moveForward()
             }
